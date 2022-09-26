@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loading = () => {
     let loading = true
-
     if (loading) {
-      DOMcontainer.removeChild(DOMcontainer.firstChild)
+      DOMcontainer.innerHTML = ''
+      // DOMcontainer.removeChild(DOMcontainer.firstChild)
       const div = document.createElement('div');
       div.classList.add('d-flex', 'mt-5', 'justify-content-center');
 
@@ -81,52 +81,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
       DOMcontainer.appendChild(div);
     }
-
     setTimeout(() => {
       loading = false;
       DOMcontainer.removeChild(DOMcontainer.firstChild)
 
+      // changePlaylayerSelected()
       gameRender()
+
     }, 1000)
   }
 
+  let currentPlayer = {
+    name: '',
+    characters: []
+  }
+
   const gameRender = async () => {
-    await fetchApi()
+    (playerOne.characters.length < 1 && playerTwo.characters.length < 1) && await fetchApi()
+
     //CREAR FUNCION QUE SELECCIONE EL JUGADOR 
     const changePlaylayerSelected = () => {
-      if (currentPlayer.name == playerOne.name) {
-
-        currentPlayer.name = playerTwo.name
-        currentPlayer.characters = playerTwo.characters
-      } else {
-        currentPlayer.name = playerOne.name
-        currentPlayer.characters = playerOne.characters
-      }
+      (currentPlayer.name == playerOne.name)
+        ? currentPlayer = playerTwo
+        : currentPlayer = playerOne
+      loading()
     }
-
+    const checkPlayer = async () => {
+      console.log(!currentPlayer);
+      if (currentPlayer.characters.length < 1) { currentPlayer = playerOne }
+    }
+    await checkPlayer()
     // CREAR OBJETO CURRENT PLAYER REFERENCIADO AL JUGADOR
-    const currentPlayer = {
-      name,
-      characters
-    }
-    const title = document.querySelector('.mobile-borders');
+    const characters = document.createElement('div');
+    characters.classList.add('h2');
+    characters.textContent = `Personajes`;
     const carrousel = document.createElement('div');
     carrousel.classList.add('d-flex', 'align-items-center', 'mt-3');
     const playerName = document.createElement('div');
     playerName.classList.add('h2');
-    // CON EL JUGADOR SELECCIONADO, MOSTRAS SU NOMBRE
-    playerName.textContent = `${currentPlayer.name}`;
-
+    playerName.textContent = `Jugador: ${currentPlayer.name}`;
+    const habilityPower = document.createElement('div');
+    habilityPower.classList.add('h4');
+    habilityPower.textContent = `Poder de habilidad: ${currentPlayer.characters[0].id + currentPlayer.characters[1].id + currentPlayer.characters[2].id}`;
     carrousel.innerHTML = `
           <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
       <div class="carousel-item active">
-        <img src=${currentPlayer.characters[0].image} class="d-block w-100 game-img" alt="...">
+        <img src=${currentPlayer.characters[0].image} class="d-block w-100 " alt="...">
       </div>
       <div class="carousel-item active">
-        <img src=${playerOne.characters[1].image} class="d-block w-100 game-img" alt="...">
+        <img src=${currentPlayer.characters[1].image} class="d-block w-100 " alt="...">
       </div><div class="carousel-item active">
-      <img src=${playerOne.characters[2].image} class="d-block w-100 game-img" alt="...">
+      <img src=${currentPlayer.characters[2].image} class="d-block w-100 " alt="...">
     </div>
             </div>
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
@@ -139,15 +145,28 @@ document.addEventListener('DOMContentLoaded', () => {
             </button>
           </div>`
     // CUANDO CAMBIES EL JUGADOR, QUE BORRE EL CARROUSEL, Y VUELVA A CREARSE CON LOS DATOS DEL JUGADOR
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.classList.add('d-flex', 'justify-content-between');
+    
     const changePlayer = document.createElement('button');
-    changePlayer.classList.add('btn', 'btn-primary', 'mb-3', 'mt-1');
+    changePlayer.classList.add('btn', 'btn-primary', 'mb-3', 'mt-1', 'px-1');
     changePlayer.textContent = 'Cambiar jugador';
+    changePlayer.addEventListener('click', changePlaylayerSelected);
+    
+    const fightButton = document.createElement('button');
+    fightButton.classList.add('btn', 'btn-danger', 'mb-3', 'mt-1', 'px-1');
+    fightButton.textContent = 'Pelear';
+    fightButton.addEventListener('click', changePlaylayerSelected);
 
 
+    DOMcontainer.insertBefore(characters, DOMcontainer.children[0]);
     DOMcontainer.appendChild(carrousel);
-    DOMcontainer.appendChild(changePlayer);
-    title.appendChild(playerName);
+    buttonsContainer.appendChild(changePlayer);
+    buttonsContainer.appendChild(fightButton);
+    DOMcontainer.appendChild(buttonsContainer);
 
+    DOMcontainer.insertBefore(playerName, DOMcontainer.children[2]);
+    DOMcontainer.insertBefore(habilityPower, DOMcontainer.children[2]);
 
   }
 
@@ -156,17 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let characters;
     const res = await fetch("https://rickandmortyapi.com/api/character/?page=1")
     characters = await res.json();
-    for (let i = 0; i < 3; i++) {
-      playerOne.characters.push(characters.results[Math.round(numeroAleatorioDecimales(0, 20))])
-      playerTwo.characters.push(characters.results[Math.round(numeroAleatorioDecimales(0, 20))])
-    }
 
+    for (let i = 0; i < 3; i++) {
+      playerOne.characters[i] = (characters.results[Math.round(numeroAleatorioDecimales(0, 20))])
+      playerTwo.characters[i] = (characters.results[Math.round(numeroAleatorioDecimales(0, 20))])
+    }
     function numeroAleatorioDecimales(min, max) {
       var num = Math.random() * (max - min);
       return num + min;
     }
-    console.log(playerOne)
   }
+
   renderizarForm()
 })
-
