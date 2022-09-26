@@ -4,16 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const playerOne = {
     name: '',
-    characterOne: '',
-    characterTwo: '',
-    characterThree: ''
+    characters: []
   }
 
   const playerTwo = {
     name: '',
-    characterOne: '',
-    characterTwo: '',
-    characterThree: ''
+    characters: []
   }
 
 
@@ -91,24 +87,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000)
   }
 
-  const gameRender = () => {
-    fetchApi()
+  const gameRender = async () => {
+    await fetchApi()
+    //CREAR FUNCION QUE SELECCIONE EL JUGADOR 
+    const changePlaylayerSelected = () =>{
+      if(currentPlayer.name==playerOne.name){
 
+        currentPlayer.name=playerTwo.name
+        currentPlayer.characters=playerTwo.characters
+      } else{
+
+      }
+    }
+
+    // CREAR OBJETO CURRENT PLAYER REFERENCIADO AL JUGADOR
+    const currentPlayer = {
+      name,
+      characters
+    }
+    const title = document.querySelector('.mobile-borders');
     const carrousel = document.createElement('div');
     carrousel.classList.add('d-flex', 'align-items-center', 'mt-3');
+    const playerName = document.createElement('div');
+    playerName.classList.add('h2');
+    // CON EL JUGADOR SELECCIONADO, MOSTRAS SU NOMBRE
+    playerName.textContent = `${playerOne.name}`;
 
     carrousel.innerHTML = `
           <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
-              <div class="carousel-item active">
-                <img src="https://repository-images.githubusercontent.com/120371205/b6740400-92d4-11ea-8a13-d5f6e0558e9b" class="d-block w-100" alt="...">
-              </div>
-              <div class="carousel-item">
-                <img src="https://repository-images.githubusercontent.com/120371205/b6740400-92d4-11ea-8a13-d5f6e0558e9b" class="d-block w-100" alt="...">
-              </div>
-              <div class="carousel-item">
-                <img src="https://repository-images.githubusercontent.com/120371205/b6740400-92d4-11ea-8a13-d5f6e0558e9b" class="d-block w-100" alt="...">
-              </div>
+      <div class="carousel-item active">
+        <img src=${currentPlayer.characters[0].image} class="d-block w-100 game-img" alt="...">
+      </div>
+      <div class="carousel-item active">
+        <img src=${playerOne.characters[1].image} class="d-block w-100 game-img" alt="...">
+      </div><div class="carousel-item active">
+      <img src=${playerOne.characters[2].image} class="d-block w-100 game-img" alt="...">
+    </div>
             </div>
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
               <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -119,28 +134,29 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="visually-hidden">Next</span>
             </button>
           </div>`
+    // CUANDO CAMBIES EL JUGADOR, QUE BORRE EL CARROUSEL, Y VUELVA A CREARSE CON LOS DATOS DEL JUGADOR
+    const changePlayer = document.createElement('button');
+    changePlayer.classList.add('btn', 'btn-primary', 'mb-3', 'mt-1');
+    changePlayer.textContent = 'Cambiar jugador';
+
 
     DOMcontainer.appendChild(carrousel);
+    DOMcontainer.appendChild(changePlayer);
+    title.appendChild(playerName);
+
 
   }
-  
+
   const fetchApi = async () => {
-    
+
     let characters;
-    
-    const res = await fetch('./rickAndMorty.json')
-    
+    const res = await fetch("https://rickandmortyapi.com/api/character/?page=1")
     characters = await res.json();
-    
-    
-    // fetch('./rickAndMorty.json')
-    //   .then(res => res.json())
-    //   .then(res => characters.push(res))
-    //   .catch(e => console.log(e))
-    playerOne.characterOne = characters[Math.round(numeroAleatorioDecimales(0, 20))]
-    playerOne.characterTwo = characters[Math.round(numeroAleatorioDecimales(0, 20))]
-    playerOne.characterThree = characters[Math.round(numeroAleatorioDecimales(0, 20))]
-    
+    for (let i = 0; i < 3; i++) {
+      playerOne.characters.push(characters.results[Math.round(numeroAleatorioDecimales(0, 20))])
+      playerTwo.characters.push(characters.results[Math.round(numeroAleatorioDecimales(0, 20))])
+    }
+
     function numeroAleatorioDecimales(min, max) {
       var num = Math.random() * (max - min);
       return num + min;
