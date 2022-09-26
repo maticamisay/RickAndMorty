@@ -4,18 +4,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const playerOne = {
     name: '',
-    characters: []
+    characters: [],
+    power: ''
   }
-
   const playerTwo = {
     name: '',
-    characters: []
+    characters: [],
+    power: ''
   }
-
+  let currentPlayer = {
+    name: '',
+    characters: [],
+    power: ''
+  }
   const partidas = {
 
   }
-
+  let isLoading = false
   function renderizarForm() {
     const form = document.createElement('form');
     const formContainer = document.createElement('div');
@@ -63,12 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
     playerOne.name = player1
     playerTwo.name = player2
 
-    loading()
+    loading('render')
   }
 
-  loading = () => {
-    let loading = true
-    if (loading) {
+  const loading = async (param) => {
+    isLoading = true
+    if (isLoading) {
       DOMcontainer.innerHTML = ''
       // DOMcontainer.removeChild(DOMcontainer.firstChild)
       const div = document.createElement('div');
@@ -82,18 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
       DOMcontainer.appendChild(div);
     }
     setTimeout(() => {
-      loading = false;
-      DOMcontainer.removeChild(DOMcontainer.firstChild)
-
-      // changePlaylayerSelected()
-      gameRender()
-
+      DOMcontainer.removeChild(DOMcontainer.firstChild);
+      isLoading = false;
+      // console.log(param );
+      (param == 'render') && gameRender();
+      (param == 'fight') && fight();
     }, 1000)
-  }
-
-  let currentPlayer = {
-    name: '',
-    characters: []
   }
 
   const gameRender = async () => {
@@ -104,10 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
       (currentPlayer.name == playerOne.name)
         ? currentPlayer = playerTwo
         : currentPlayer = playerOne
-      loading()
+      loading('render')
     }
     const checkPlayer = async () => {
-      console.log(!currentPlayer);
       if (currentPlayer.characters.length < 1) { currentPlayer = playerOne }
     }
     await checkPlayer()
@@ -122,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     playerName.textContent = `Jugador: ${currentPlayer.name}`;
     const habilityPower = document.createElement('div');
     habilityPower.classList.add('h4');
-    habilityPower.textContent = `Poder de habilidad: ${currentPlayer.characters[0].id + currentPlayer.characters[1].id + currentPlayer.characters[2].id}`;
+    habilityPower.textContent = `Poder de habilidad: ${currentPlayer.power}`;
     carrousel.innerHTML = `
           <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
@@ -147,17 +145,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // CUANDO CAMBIES EL JUGADOR, QUE BORRE EL CARROUSEL, Y VUELVA A CREARSE CON LOS DATOS DEL JUGADOR
     const buttonsContainer = document.createElement('div');
     buttonsContainer.classList.add('d-flex', 'justify-content-between');
-    
+
     const changePlayer = document.createElement('button');
     changePlayer.classList.add('btn', 'btn-primary', 'mb-3', 'mt-1', 'px-1');
     changePlayer.textContent = 'Cambiar jugador';
     changePlayer.addEventListener('click', changePlaylayerSelected);
-    
+
     const fightButton = document.createElement('button');
     fightButton.classList.add('btn', 'btn-danger', 'mb-3', 'mt-1', 'px-1');
     fightButton.textContent = 'Pelear';
-    fightButton.addEventListener('click', changePlaylayerSelected);
-
+    fightButton.addEventListener('click', () => loading('fight'));
 
     DOMcontainer.insertBefore(characters, DOMcontainer.children[0]);
     DOMcontainer.appendChild(carrousel);
@@ -173,18 +170,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const fetchApi = async () => {
 
     let characters;
+
     const res = await fetch("https://rickandmortyapi.com/api/character/?page=1")
     characters = await res.json();
 
     for (let i = 0; i < 3; i++) {
       playerOne.characters[i] = (characters.results[Math.round(numeroAleatorioDecimales(0, 20))])
+      playerOne.power += playerOne.characters[i].id
       playerTwo.characters[i] = (characters.results[Math.round(numeroAleatorioDecimales(0, 20))])
-    }
-    function numeroAleatorioDecimales(min, max) {
-      var num = Math.random() * (max - min);
-      return num + min;
-    }
-  }
+      playerTwo.power += playerTwo.characters[i].id
 
-  renderizarForm()
+    }
+  
+  playerOne.power = playerOne.characters[0].id + playerOne.characters[1].id + playerOne.characters[2].id
+  playerTwo.power = playerTwo.characters[0].id + playerTwo.characters[1].id + playerTwo.characters[2].id
+
+
+  console.log(playerOne);
+  console.log(playerTwo);
+
+  function numeroAleatorioDecimales(min, max) {
+    var num = Math.random() * (max - min);
+    return num + min;
+  }
+}
+
+  const fight = () => {
+  let winner
+  (playerOne.power === playerTwo.power) && (winner = 'Empate')
+  playerOne.power > playerTwo.power ? winner = playerOne.name : winner = playerTwo.name
+  const fightResult = document.createElement('div');
+  fightResult.classList.add('h2');
+  fightResult.textContent = `El ganador es: ${winner}`
+
+  DOMcontainer.appendChild(fightResult);
+}
+renderizarForm()
 })
