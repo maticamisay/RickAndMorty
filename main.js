@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     characters: []
   }
 
+  const partidas = {
+
+  }
 
   function renderizarForm() {
     const form = document.createElement('form');
@@ -90,13 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const gameRender = async () => {
     await fetchApi()
     //CREAR FUNCION QUE SELECCIONE EL JUGADOR 
-    const changePlaylayerSelected = () =>{
-      if(currentPlayer.name==playerOne.name){
+    const changePlaylayerSelected = () => {
+      if (currentPlayer.name == playerOne.name) {
 
-        currentPlayer.name=playerTwo.name
-        currentPlayer.characters=playerTwo.characters
-      } else{
-
+        currentPlayer.name = playerTwo.name
+        currentPlayer.characters = playerTwo.characters
+      } else {
+        currentPlayer.name = playerOne.name
+        currentPlayer.characters = playerOne.characters
       }
     }
 
@@ -111,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerName = document.createElement('div');
     playerName.classList.add('h2');
     // CON EL JUGADOR SELECCIONADO, MOSTRAS SU NOMBRE
-    playerName.textContent = `${playerOne.name}`;
+    playerName.textContent = `${currentPlayer.name}`;
 
     carrousel.innerHTML = `
           <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
